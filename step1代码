@@ -1,0 +1,52 @@
+def coin_greedy(coins, amount):
+    """
+    贪心凑硬币：每次选不超过剩余金额的最大面额
+    :param coins: 硬币面额列表
+    :param amount: 需要凑的总金额
+    :return: (硬币枚数, 选取的硬币组合列表)
+    """
+    coins_sorted = sorted(coins, reverse=True)
+    rest = amount
+    selected = []
+    for c in coins_sorted:
+        while rest >= c:
+            selected.append(c)
+            rest -= c
+    return len(selected), selected
+
+
+def coin_dp(coins, amount):
+    """
+    动态规划求最少硬币枚数 + 回溯得到硬币组合（至多装满）
+    :param coins: 硬币面额
+    :param amount: 目标金额
+    :return: (最少枚数, 硬币组合)
+    """
+    INF = float('inf')
+    # dp[i] 代表凑金额i的最少硬币数量
+    dp = [INF] * (amount + 1)
+    # prev[i] 记录金额i是由哪一个硬币转移过来，用于回溯
+    prev = [-1] * (amount + 1)
+    dp[0] = 0  # 金额0，需要0枚硬币
+
+    for i in range(1, amount + 1):
+        for c in coins:
+            if i - c >= 0 and dp[i - c] + 1 < dp[i]:
+                dp[i] = dp[i - c] + 1
+                prev[i] = c
+    # 回溯构造组合
+    res = []
+    cur = amount
+    while cur > 0 and prev[cur] != -1:
+        res.append(prev[cur])
+        cur -= prev[cur]
+    return dp[amount], res
+
+
+if __name__ == "__main__":
+    coin_list = [1, 5, 11]
+    target = 15
+    g_cnt, g_combo = coin_greedy(coin_list, target)
+    d_cnt, d_combo = coin_dp(coin_list, target)
+    print(f"【贪心算法】枚数：{g_cnt}，组合：{g_combo}")
+    print(f"【动态规划】枚数：{d_cnt}，组合：{d_combo}")
